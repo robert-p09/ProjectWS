@@ -1,0 +1,14 @@
+upstream drupal {
+  server drupal1;
+  server drupal2;
+}
+
+server {
+  listen 80;
+
+  server_name _;
+
+  location / {
+      proxy_pass http://drupal;
+  }
+}

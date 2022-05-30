@@ -1,0 +1,71 @@
+version: "3"
+services:
+
+  loadbalancer:
+    depends_on:
+      - drupal1
+      - drupal2
+    image: robertp09/load_balancer
+    container_name: loadb
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - net
+
+  postgres:
+    image: postgres
+    container_name: postdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: admin
+      POSTGRES_DB: mydata
+    networks:
+      - net
+
+  drupal1:
+    depends_on:
+      - postgres
+    image: robertp09/mydrupal
+    container_name: drupal1
+    ports:
+      - "8081:80"
+    volumes:
+      - web-modules:/var/www/html/drupal/modules
+      - web-themes:/var/www/html/drupal/themes
+      - web-profiles:/var/www/html/drupal/profiles
+      - web-sites:/var/www/html/drupal/sites
+    restart: always
+    networks:
+      - net
+
+  drupal2:
+    depends_on:
+      - postgres
+    image: robertp09/mydrupal
+    container_name: drupal2
+    ports:
+      - "8082:80"
+    volumes:
+      - web-modules:/var/www/html/drupal/modules
+      - web-themes:/var/www/html/drupal/themes
+      - web-profiles:/var/www/html/drupal/profiles
+      - web-sites:/var/www/html/drupal/sites
+    restart: always
+    networks:
+      - net
+
+networks:
+  net:
+
+volumes:
+  pgdata:
+  web-modules:
+  web-themes:
+  web-profiles:
+  web-sites:
