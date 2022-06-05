@@ -8,19 +8,25 @@ node {
         sh 'sudo docker build -f dockerfile.lb -t  robertp09/load_balancer .'
     }
 
-    stage('Push Docker Image'){
+    stage('Login DockerHub'){
         withCredentials([string(credentialsId: 'docker-pwd', variable: 'dockerHubPwd')]) {
-        sh "sudo docker login -u robertp09 -p ${dockerHubPwd}"
+        sh 'sudo docker login -u robertp09 -p $dockerHubPwd'
         }
+    }
+    
+    stage('Push Docker Image'){
 
-        # sh 'sudo docker login -u robertp09 -p DockerHub'
-        sh 'docker push robertp09/mydrupal' 
-        sh 'docker push robertp09/load_balancer'
+        sh 'sudo docker push robertp09/mydrupal' 
+        sh 'sudo docker push robertp09/load_balancer'
     }
 
-    stage('Run Container on Server'){ 
-        sshagent
+     stage('Run Container on Server'){ 
+        
+        def DC = 'sudo docker-compose up -d'
+        
+        sshagent(['app-server']) {
+        sh "ssh -o StrictHostKeyChecking=no jenkins@192.168.56.90 ${DC}"
+    }
 
-        sh 'sudo docker-compose up -d'
     }
 }
